@@ -1,2 +1,14 @@
-.venv
+# .gitignore
+
+# Ignore Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Virtual Environments
+.venv/
+venv/
+env/
+
+# Ignore Environment Variables (CRITICAL!)
 .env
