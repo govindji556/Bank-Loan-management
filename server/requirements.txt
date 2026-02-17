@@ -1,0 +1,8 @@
+fastapi[all]
+sqlalchemy>=2.0
+aiomysql
+cryptography
+pydantic-settings
+pwdlib[bcrypt]
+PyJWT
+python-multipart
