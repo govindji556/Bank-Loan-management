@@ -1,6 +1,7 @@
 fastapi[all]
 sqlalchemy>=2.0
 aiomysql
+aiosqlite
 cryptography
 pydantic-settings
 pwdlib[bcrypt]
