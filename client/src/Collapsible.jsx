@@ -9,8 +9,14 @@ function Collapsible({ title, children }) {
         className="collapsible-header"
         onClick={() => setOpen(!open)}
       >
-        {title}
-        <span>{open ? "▲" : "▼"}</span>
+        <span>{title}</span>
+        <span style={{ 
+          transition: 'transform 0.3s ease',
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          display: 'inline-block'
+        }}>
+          ▼
+        </span>
       </div>
 
       {open && (

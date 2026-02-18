@@ -1,60 +1,397 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Container & Dashboard */
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dashboard {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.dashboard h2 {
+  color: #333;
+  font-size: 28px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Cards */
+.card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+.card h2 {
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 24px;
+  text-align: center;
+}
+
+/* Form Inputs */
+input, select {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: #f8f9ff;
+}
+
+input::placeholder {
+  color: #999;
+}
+
+/* Buttons */
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card button {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-top: 10px;
+}
+
+.card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.card button:active {
+  transform: translateY(0);
+}
+
+/* Switch Text */
+.switch {
+  text-align: center;
+  margin-top: 20px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.3s ease;
+}
+
+.switch:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
 
 /* Collapsible */
 .collapsible {
-  width: 500px;
+  width: 100%;
   margin-top: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 1px solid #e0e0e0;
 }
 
 .collapsible-header {
-  background: #1e3a8a;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 15px;
+  padding: 16px 20px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
-  font-weight: bold;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.collapsible-header:hover {
+  box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);
+}
+
+.collapsible-header span {
+  transition: transform 0.3s ease;
+  font-size: 12px;
 }
 
 .collapsible-content {
-  max-height: 350px;
-  overflow-y: auto;   /* SCROLL ENABLED */
+  max-height: 500px;
+  overflow-y: auto;
   background: white;
-  padding: 15px;
+  padding: 20px;
+  max-width: 100%;
+}
+
+.collapsible-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.collapsible-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.collapsible-content::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.collapsible-content::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
 }
 
 /* Request Card */
 .request-card {
-  position: relative;
-  border: 1px solid #ddd;
-  padding: 15px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
   margin-bottom: 15px;
-  border-radius: 6px;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.3s ease;
 }
 
-/* Floating Buttons */
-.approve-btn {
-  position: absolute;
-  right: 110px;
-  bottom: 10px;
+.request-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: white;
+}
+
+.request-card p {
+  margin: 10px 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.request-card strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.request-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.request-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.request-info-item strong {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+
+.request-info-item span {
+  font-size: 16px;
+  color: #333;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
   padding: 6px 12px;
-  background: green;
-  color: white;
-  border: none;
   border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 15px;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Button Group */
+.request-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.approve-btn, .reject-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approve-btn {
+  background: #28a745;
+  color: white;
+}
+
+.approve-btn:hover {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.approve-btn:active {
+  transform: translateY(0);
 }
 
 .reject-btn {
-  position: absolute;
-  right: 20px;
-  bottom: 10px;
-  padding: 6px 12px;
-  background: red;
+  background: #dc3545;
   color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
+}
+
+.reject-btn:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.reject-btn:active {
+  transform: translateY(0);
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #667eea;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.empty-state p {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 20px;
+  }
+
+  .dashboard h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    padding: 30px 20px;
+  }
+
+  .card h2 {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .request-info {
+    grid-template-columns: 1fr;
+  }
+
+  .request-actions {
+    flex-direction: column;
+  }
+
+  .approve-btn, .reject-btn {
+    width: 100%;
+  }
+
+  .collapsible {
+    margin-top: 15px;
+  }
+
+  .collapsible-content {
+    padding: 15px;
+    max-height: 400px;
+  }
 }
