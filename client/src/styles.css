@@ -1,15 +1,6 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
-}
-
-.dashboard {
-  padding: 30px;
-}
 
 /* Collapsible */
-.collapsible-container {
+.collapsible {
   width: 500px;
   margin-top: 20px;
   border-radius: 8px;
@@ -29,7 +20,7 @@ body {
 
 .collapsible-content {
   max-height: 350px;
-  overflow-y: auto;
+  overflow-y: auto;   /* SCROLL ENABLED */
   background: white;
   padding: 15px;
 }
@@ -66,12 +57,4 @@ body {
   border: none;
   border-radius: 20px;
   cursor: pointer;
-}
-
-.approve-btn:hover {
-  background: darkgreen;
-}
-
-.reject-btn:hover {
-  background: darkred;
 }

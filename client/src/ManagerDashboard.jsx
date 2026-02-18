@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Collapsible from "./Collapsible";
-import "./manager.css";
 
 function ManagerDashboard() {
   const [requests, setRequests] = useState([]);
 
   const fetchRequests = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/loan-requests");
-      const data = await res.json();
-      setRequests(data);
-    } catch (err) {
-      console.error("Error fetching requests:", err);
-    }
+    const res = await fetch("http://localhost:8000/loan-requests");
+    const data = await res.json();
+    setRequests(data);
   };
 
   useEffect(() => {
@@ -20,15 +15,10 @@ function ManagerDashboard() {
   }, []);
 
   const updateStatus = async (id, decision) => {
-    try {
-      await fetch(`http://localhost:8000/loan/${id}/${decision}`, {
-        method: "PUT"
-      });
-
-      fetchRequests();
-    } catch (err) {
-      console.error("Error updating loan:", err);
-    }
+    await fetch(`http://localhost:8000/loan/${id}/${decision}`, {
+      method: "PUT"
+    });
+    fetchRequests();
   };
 
   return (
@@ -37,7 +27,7 @@ function ManagerDashboard() {
 
       <Collapsible title="Loan Requests">
         {requests.map((req) => (
-          <div className="request-card" key={req.id}>
+          <div key={req.id} className="request-card">
             <p><strong>User:</strong> {req.username}</p>
             <p><strong>Amount:</strong> ₹{req.amount}</p>
             <p><strong>Status:</strong> {req.status}</p>
@@ -58,7 +48,6 @@ function ManagerDashboard() {
           </div>
         ))}
       </Collapsible>
-
     </div>
   );
 }
