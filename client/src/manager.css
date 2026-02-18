@@ -1,0 +1,77 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+}
+
+.dashboard {
+  padding: 30px;
+}
+
+/* Collapsible */
+.collapsible-container {
+  width: 500px;
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.collapsible-header {
+  background: #1e3a8a;
+  color: white;
+  padding: 15px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+}
+
+.collapsible-content {
+  max-height: 350px;
+  overflow-y: auto;
+  background: white;
+  padding: 15px;
+}
+
+/* Request Card */
+.request-card {
+  position: relative;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+/* Floating Buttons */
+.approve-btn {
+  position: absolute;
+  right: 110px;
+  bottom: 10px;
+  padding: 6px 12px;
+  background: green;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.reject-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  padding: 6px 12px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.approve-btn:hover {
+  background: darkgreen;
+}
+
+.reject-btn:hover {
+  background: darkred;
+}
