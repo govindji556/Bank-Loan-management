@@ -17,10 +17,14 @@ export default function Login({ onLogin }) {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/login", {
+      // send it as formdata instead of json to avoid CORS issues
+
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
+      const response = await fetch("http://localhost:8000/users/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: formData,
       });
 
       const data = await response.json();
