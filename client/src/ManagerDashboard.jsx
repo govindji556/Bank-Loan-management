@@ -1,100 +1,111 @@
-import React, { useEffect, useState } from "react";
-import Collapsible from "./Collapsible";
+import React, { useState, useEffect } from "react";
 
-function ManagerDashboard() {
+export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
+  const [isOpen, setIsOpen] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("http://localhost:8000/loan-requests");
-      if (!res.ok) throw new Error("Failed to fetch requests");
-      const data = await res.json();
-      setRequests(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchRequests();
   }, []);
 
-  const updateStatus = async (id, decision) => {
+  const fetchRequests = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/loan/${id}/${decision}`, {
-        method: "PUT"
-      });
-      if (!res.ok) throw new Error("Failed to update status");
-      await fetchRequests();
+      setLoading(true);
+      const response = await fetch("http://localhost:8000/loan-requests");
+      if (response.ok) {
+        const data = await response.json();
+        setRequests(data);
+      }
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      console.error("Error fetching requests:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const badgeClass = `status-badge status-${status?.toLowerCase() || 'pending'}`;
-    return <span className={badgeClass}>{status || "Pending"}</span>;
+  const updateStatus = async (id, status) => {
+    try {
+      const response = await fetch(`http://localhost:8000/loan/${id}/${status}`, {
+        method: "PUT",
+      });
+      if (response.ok) {
+        setRequests(requests.map(r =>
+          r.id === id ? { ...r, status } : r
+        ));
+        alert(`Loan ${status} successfully!`);
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
   };
 
   return (
     <div className="dashboard">
-      <h2>📋 Manager Dashboard</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1>Manager Dashboard</h1>
+        <button className="logout-btn" onClick={onLogout}>Logout</button>
+      </div>
 
-      <Collapsible title="Loan Requests">
-        {loading ? (
-          <div className="loading">Loading requests</div>
-        ) : error ? (
-          <div style={{ color: '#dc3545', padding: '20px', textAlign: 'center' }}>
-            Error: {error}
-          </div>
-        ) : requests.length === 0 ? (
-          <div className="empty-state">
-            <p>No loan requests at the moment</p>
-          </div>
-        ) : (
-          requests.map((req) => (
-            <div key={req.id} className="request-card">
-              {getStatusBadge(req.status)}
-              
-              <div className="request-info">
-                <div className="request-info-item">
-                  <strong>Applicant</strong>
-                  <span>{req.username}</span>
-                </div>
-                <div className="request-info-item">
-                  <strong>Loan Amount</strong>
-                  <span>₹{req.amount?.toLocaleString()}</span>
-                </div>
-              </div>
+      <div className="collapsible-section">
+        <div
+          className="collapsible-header"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span>📋 Loan Requests</span>
+          <span>{isOpen ? "▲" : "▼"}</span>
+        </div>
 
-              <div className="request-actions">
-                <button
-                  className="approve-btn"
-                  onClick={() => updateStatus(req.id, "approved")}
-                  disabled={req.status !== "pending"}
-                >
-                  ✓ Approve
-                </button>
-                <button
-                  className="reject-btn"
-                  onClick={() => updateStatus(req.id, "rejected")}
-                  disabled={req.status !== "pending"}
-                >
-                  ✕ Reject
-                </button>
+        {isOpen && (
+          <div className="collapsible-content">
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
+                Loading requests...
               </div>
-            </div>
-          ))
+            ) : requests.length === 0 ? (
+              <div className="empty-message">No loan requests</div>
+            ) : (
+              <div className="requests-list">
+                {requests.map((req) => (
+                  <div key={req.id} className="request-item">
+                    <div className="request-details">
+                      <p>
+                        <strong>Username:</strong> {req.username}
+                      </p>
+                      <p>
+                        <strong>Amount:</strong> ₹{req.amount?.toLocaleString() || 0}
+                      </p>
+                      <p>
+                        <span className={`status-badge status-${req.status}`}>
+                          {req.status}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="request-actions">
+                      <button
+                        className="btn-approve"
+                        onClick={() => updateStatus(req.id, "approved")}
+                        disabled={req.status !== "pending"}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="btn-reject"
+                        onClick={() => updateStatus(req.id, "rejected")}
+                        disabled={req.status !== "pending"}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
-      </Collapsible>
+      </div>
     </div>
   );
 }
-
-export default ManagerDashboard;
