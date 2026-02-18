@@ -15,9 +15,7 @@ export default function App() {
   };
 
   if (user) {
-    return user.role === "manager" ? (
-      <ManagerDashboard user={user} onLogout={handleLogout} />
-    ) : (
+    return (
       <UserDashboard user={user} onLogout={handleLogout} />
     );
   }

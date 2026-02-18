@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 
 export default function Login({ onLogin }) {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!email || !password) {
       setError("Please fill in all fields");
       return;
     }
@@ -17,10 +17,8 @@ export default function Login({ onLogin }) {
     setError("");
 
     try {
-      // send it as formdata instead of json to avoid CORS issues
-
       const formData = new FormData();
-      formData.append("username", username);
+      formData.append("username", email);
       formData.append("password", password);
       const response = await fetch("http://localhost:8000/users/login", {
         method: "POST",
@@ -30,7 +28,7 @@ export default function Login({ onLogin }) {
       const data = await response.json();
 
       if (response.ok) {
-        onLogin({ username, role: data.role });
+        onLogin({ email: data.email, id: data.id, name: data.name });
       } else {
         setError(data.detail || "Login failed");
       }
@@ -48,12 +46,12 @@ export default function Login({ onLogin }) {
         {error && <div className="alert error">{error}</div>}
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Username</label>
+            <label>Email</label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
               disabled={loading}
             />
           </div>

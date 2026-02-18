@@ -2,8 +2,6 @@ import React, { useState } from "react";
 
 export default function UserDashboard({ user, onLogout }) {
   const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -11,32 +9,7 @@ export default function UserDashboard({ user, onLogout }) {
       alert("Please enter loan amount");
       return;
     }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("http://localhost:8000/loan-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: user.username,
-          amount: parseFloat(amount),
-        }),
-      });
-
-      if (response.ok) {
-        setSuccess(true);
-        setAmount("");
-        setTimeout(() => setSuccess(false), 3000);
-      } else {
-        const data = await response.json();
-        alert(data.detail || "Failed to submit request");
-      }
-    } catch (err) {
-      alert("Error: " + err.message);
-    } finally {
-      setLoading(false);
-    }
+    alert("Loan request feature coming soon! Backend endpoints in development.");
   };
 
   return (
@@ -47,13 +20,7 @@ export default function UserDashboard({ user, onLogout }) {
       </div>
 
       <div className="user-dashboard">
-        <h2>Welcome, {user.username}</h2>
-
-        {success && (
-          <div className="alert success">
-            Loan request submitted successfully!
-          </div>
-        )}
+        <h2>Welcome, {user.name}</h2>
 
         <form onSubmit={handleSubmit} style={{ maxWidth: "400px", margin: "30px auto" }}>
           <div className="form-group">
@@ -64,11 +31,10 @@ export default function UserDashboard({ user, onLogout }) {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter loan amount"
               min="1"
-              disabled={loading}
             />
           </div>
-          <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Request Loan"}
+          <button className="btn" type="submit">
+            Request Loan
           </button>
         </form>
       </div>
