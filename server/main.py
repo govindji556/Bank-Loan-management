@@ -9,7 +9,7 @@ from app.features.users.router import router as users_router
 async def lifespan(app:FastAPI):
 
     async with engine.begin() as conn:
-        conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all)
     yield
 
 app = FastAPI(
