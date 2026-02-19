@@ -19,3 +19,4 @@ AsyncSessionLocal = async_sessionmaker(
 Base = declarative_base()
 
 from app.features.users.models import User
+from app.features.loans.models import BankLoan, UserLoanApplication
