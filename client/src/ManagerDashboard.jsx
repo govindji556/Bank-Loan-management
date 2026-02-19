@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Collapsible from "./Collapsible";
+import { apiGet, apiPut } from "./services/apiService.js";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
@@ -13,11 +14,8 @@ export default function ManagerDashboard({ user, onLogout }) {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8000/loan-requests");
-      if (response.ok) {
-        const data = await response.json();
-        setRequests(data);
-      }
+      const data = await apiGet("/loan-requests");
+      setRequests(data);
     } catch (err) {
       console.error("Error fetching requests:", err);
     } finally {
@@ -27,17 +25,11 @@ export default function ManagerDashboard({ user, onLogout }) {
 
   const updateStatus = async (id, status) => {
     try {
-      const response = await fetch(`http://localhost:8000/loan/${id}/${status}`, {
-        method: "PUT",
-      });
-      if (response.ok) {
-        setRequests(requests.map(r =>
-          r.id === id ? { ...r, status } : r
-        ));
-        alert(`Loan ${status} successfully!`);
-      } else {
-        alert("Failed to update status");
-      }
+      await apiPut(`/loan/${id}/${status}`);
+      setRequests(requests.map(r =>
+        r.id === id ? { ...r, status } : r
+      ));
+      alert(`Loan ${status} successfully!`);
     } catch (err) {
       alert("Error: " + err.message);
     }

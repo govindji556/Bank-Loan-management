@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { apiPost } from "./services/apiService.js";
 import Collapsible from "./Collapsible";
 
 export default function Signup() {
@@ -83,26 +84,17 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/users/register", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ email, name, password, role: userType }),
-      });
-
-      if (response.ok) {
-        setEmail("");
-        setName("");
-        setPassword("");
-        setConfirmPassword("");
-        setUserType("user");
-        setFieldErrors({});
-        setTimeout(() => navigate("/login"), 1500);
-      } else {
-        const data = await response.json();
-        setError(data.detail || "Signup failed");
-      }
+      await apiPost("/auth/register", { email, name, password, role: userType });
+      
+      setEmail("");
+      setName("");
+      setPassword("");
+      setConfirmPassword("");
+      setUserType("user");
+      setFieldErrors({});
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
-      setError("Connection error. Please try again.");
+      setError(err.message || "Connection error. Please try again.");
     } finally {
       setLoading(false);
     }

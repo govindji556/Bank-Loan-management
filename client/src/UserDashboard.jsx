@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiPost } from "./services/apiService.js";
 
 export default function UserDashboard({ user, onLogout }) {
   const [amount, setAmount] = useState("");
@@ -22,26 +23,16 @@ export default function UserDashboard({ user, onLogout }) {
     setSuccess("");
 
     try {
-      const response = await fetch("http://localhost:8000/loans/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.id,
-          amount: parseFloat(amount),
-        }),
+      await apiPost("/loans/request", {
+        user_id: user.id,
+        amount: parseFloat(amount),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Loan request submitted successfully!");
-        setAmount("");
-        setTimeout(() => setSuccess(""), 3000);
-      } else {
-        setError(data.detail || "Failed to submit loan request");
-      }
+      
+      setSuccess("Loan request submitted successfully!");
+      setAmount("");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError("Connection error. Please try again.");
+      setError(err.message || "Failed to submit loan request");
     } finally {
       setLoading(false);
     }

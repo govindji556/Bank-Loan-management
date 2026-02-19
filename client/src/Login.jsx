@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { apiPost } from "./services/apiService.js";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -49,22 +50,22 @@ export default function Login({ onLogin }) {
       const formData = new FormData();
       formData.append("username", email);
       formData.append("password", password);
-      const response = await fetch("http://localhost:8000/users/login", {
-        method: "POST",
-        body: formData,
-      });
+      const data = await apiPost("/auth/login", formData, true);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        const userData = { email: data.email, id: data.id, name: data.name, role: data.role };
-        onLogin(userData);
-        navigate("/dashboard", { replace: true });
-      } else {
-        setError(data.detail || "Login failed");
-      }
+      // Store access token in localStorage
+      localStorage.setItem("accessToken", data.access_token);
+      
+      // Store user data (excluding token)
+      const userData = { 
+        email: data.email, 
+        id: data.id, 
+        name: data.name, 
+        role: data.role 
+      };
+      onLogin(userData);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError("Connection error. Please try again.");
+      setError(err.message || "Connection error. Please try again.");
     } finally {
       setLoading(false);
     }

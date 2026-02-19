@@ -11,9 +11,11 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   const handleLogout = () => {
+    // Clear access token from localStorage
+    localStorage.removeItem("accessToken");
     setUser(null);
   };
-
+  
   return (
     <Routes>
       <Route path="/login" element={<Login onLogin={setUser} />} />
