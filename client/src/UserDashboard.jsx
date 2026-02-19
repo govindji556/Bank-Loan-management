@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { apiPost } from "../services/apiService";
+import { apiPost } from "./services/apiService.js";
 
 export default function UserDashboard({ user, onLogout }) {
   const [amount, setAmount] = useState("");

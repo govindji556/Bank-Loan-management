@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Collapsible from "./Collapsible";
-import { apiGet, apiPut } from "../services/apiService";
+import { apiGet, apiPut } from "./services/apiService.js";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
