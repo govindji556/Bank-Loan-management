@@ -6,9 +6,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.features.users.models import User
 from app.features.users.schema import UserCreate,UserRead
+from app.core.security import get_current_user
 from dependencies import get_db
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+@router.get("/me", response_model=UserRead)
+async def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
 
 @router.get("/{user_id}", response_model=UserRead )
 async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):

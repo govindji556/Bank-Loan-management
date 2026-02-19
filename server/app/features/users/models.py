@@ -6,7 +6,7 @@ from sqlalchemy import String, Enum as SQLAEnum
 
 class UserRole(str, enum.Enum):
     USER = "user"
-    ADMIN = "admin"
+    MANAGER = "manager"
 
 class User(Base):
     __tablename__="users"
