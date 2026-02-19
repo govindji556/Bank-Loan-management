@@ -1,20 +1,49 @@
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Email validation
+  const isValidEmail = (emailValue) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(emailValue);
+  };
+
+  // Validate fields before submission
+  const validateFields = () => {
+    const errors = {};
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else if (!isValidEmail(email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please fill in all fields");
+    setError("");
+
+    if (!validateFields()) {
       return;
     }
 
     setLoading(true);
-    setError("");
 
     try {
       const formData = new FormData();
@@ -28,7 +57,9 @@ export default function Login({ onLogin }) {
       const data = await response.json();
 
       if (response.ok) {
-        onLogin({ email: data.email, id: data.id, name: data.name, role: data.role });
+        const userData = { email: data.email, id: data.id, name: data.name, role: data.role };
+        onLogin(userData);
+        navigate("/dashboard", { replace: true });
       } else {
         setError(data.detail || "Login failed");
       }
@@ -50,25 +81,40 @@ export default function Login({ onLogin }) {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (fieldErrors.email) {
+                  setFieldErrors({ ...fieldErrors, email: "" });
+                }
+              }}
               placeholder="Enter your email"
               disabled={loading}
             />
+            {fieldErrors.email && <span style={{ color: "#d32f2f", fontSize: "0.875rem", marginTop: "4px" }}>{fieldErrors.email}</span>}
           </div>
           <div className="form-group">
             <label>Password</label>
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) {
+                  setFieldErrors({ ...fieldErrors, password: "" });
+                }
+              }}
               placeholder="Enter your password"
               disabled={loading}
             />
+            {fieldErrors.password && <span style={{ color: "#d32f2f", fontSize: "0.875rem", marginTop: "4px" }}>{fieldErrors.password}</span>}
           </div>
           <button className="btn" type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <p className="toggle-link" style={{ textAlign: "center", color: "#667eea", marginTop: "20px" }}>
+          Don't have an account? <Link to="/signup" style={{ cursor: "pointer", fontWeight: "600", textDecoration: "none", color: "#667eea" }}>Sign Up</Link>
+        </p>
       </div>
     </div>
   );
