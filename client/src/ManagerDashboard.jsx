@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Collapsible from "./Collapsible";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
@@ -50,15 +51,7 @@ export default function ManagerDashboard({ user, onLogout }) {
       </div>
 
       <div className="collapsible-section">
-        <div
-          className="collapsible-header"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span>📋 Loan Requests</span>
-          <span>{isOpen ? "▲" : "▼"}</span>
-        </div>
-
-        {isOpen && (
+        <Collapsible title="📋 Loan Requests">
           <div className="collapsible-content">
             {loading ? (
               <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>
@@ -104,7 +97,7 @@ export default function ManagerDashboard({ user, onLogout }) {
               </div>
             )}
           </div>
-        )}
+        </Collapsible>
       </div>
     </div>
   );

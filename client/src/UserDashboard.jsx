@@ -2,14 +2,49 @@ import React, { useState } from "react";
 
 export default function UserDashboard({ user, onLogout }) {
   const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount) {
-      alert("Please enter loan amount");
+      setError("Please enter loan amount");
       return;
     }
-    alert("Loan request feature coming soon! Backend endpoints in development.");
+    if (amount <= 0) {
+      setError("Loan amount must be greater than 0");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await fetch("http://localhost:8000/loans/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          amount: parseFloat(amount),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess("Loan request submitted successfully!");
+        setAmount("");
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        setError(data.detail || "Failed to submit loan request");
+      }
+    } catch (err) {
+      setError("Connection error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,6 +58,9 @@ export default function UserDashboard({ user, onLogout }) {
         <h2>Welcome, {user.name}</h2>
 
         <form onSubmit={handleSubmit} style={{ maxWidth: "400px", margin: "30px auto" }}>
+          {error && <div className="alert error">{error}</div>}
+          {success && <div className="alert success">{success}</div>}
+          
           <div className="form-group">
             <label>Loan Amount (₹)</label>
             <input
@@ -31,10 +69,11 @@ export default function UserDashboard({ user, onLogout }) {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter loan amount"
               min="1"
+              disabled={loading}
             />
           </div>
-          <button className="btn" type="submit">
-            Request Loan
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? "Submitting..." : "Request Loan"}
           </button>
         </form>
       </div>

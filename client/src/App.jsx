@@ -13,13 +13,19 @@ export default function App() {
     setUser(null);
     setIsSignup(false);
   };
-
+  return <ManagerDashboard user = {userType = "manager"} onLogout={handleLogout} />;
   if (user) {
+    // Route to appropriate dashboard based on user type
+    if (user.userType === "manager") {
+      return (
+        <ManagerDashboard user={user} onLogout={handleLogout} />
+      );
+    }
     return (
       <UserDashboard user={user} onLogout={handleLogout} />
     );
   }
-
+  
   return isSignup ? (
     <div>
       <Signup onSignup={() => setIsSignup(false)} />

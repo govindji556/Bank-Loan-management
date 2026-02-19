@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import Collapsible from "./Collapsible";
 
 export default function Signup({ onSignup }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("user");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,18 +26,19 @@ export default function Signup({ onSignup }) {
     try {
       const response = await fetch("http://localhost:8000/users/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, password }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ email, name, password, user_type: userType }),
       });
 
       if (response.ok) {
         setEmail("");
         setName("");
         setPassword("");
+        setUserType("user");
         setTimeout(() => onSignup(), 1500);
       } else {
         const data = await response.json();
-        setError(data.detail || "Signup failed");front
+        setError(data.detail || "Signup failed");
       }
     } catch (err) {
       setError("Connection error. Please try again.");
@@ -49,6 +52,34 @@ export default function Signup({ onSignup }) {
       <div className="auth-card">
         <h2>Sign Up</h2>
         {error && <div className="alert error">{error}</div>}
+        
+        <Collapsible title="Select User Type">
+          <div style={{ padding: "15px", display: "flex", gap: "20px" }}>
+            <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="userType"
+                value="user"
+                checked={userType === "user"}
+                onChange={(e) => setUserType(e.target.value)}
+                style={{ marginRight: "8px" }}
+              />
+              Regular User
+            </label>
+            <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="userType"
+                value="manager"
+                checked={userType === "manager"}
+                onChange={(e) => setUserType(e.target.value)}
+                style={{ marginRight: "8px" }}
+              />
+              Manager
+            </label>
+          </div>
+        </Collapsible>
+
         <form onSubmit={handleSignup}>
           <div className="form-group">
             <label>Email</label>
