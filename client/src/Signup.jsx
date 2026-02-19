@@ -27,7 +27,7 @@ export default function Signup({ onSignup }) {
       const response = await fetch("http://localhost:8000/users/register", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ email, name, password, user_type: userType }),
+        body: JSON.stringify({ email, name, password, role: userType }),
       });
 
       if (response.ok) {

@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import Collapsible from "./Collapsible";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("user");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +28,7 @@ export default function Login({ onLogin }) {
       const data = await response.json();
 
       if (response.ok) {
-        onLogin({ email: data.email, id: data.id, name: data.name, userType: userType });
+        onLogin({ email: data.email, id: data.id, name: data.name, role: data.role });
       } else {
         setError(data.detail || "Login failed");
       }
@@ -46,34 +44,6 @@ export default function Login({ onLogin }) {
       <div className="auth-card">
         <h2>Login</h2>
         {error && <div className="alert error">{error}</div>}
-        
-        <Collapsible title="Select User Type">
-          <div style={{ padding: "15px", display: "flex", gap: "20px" }}>
-            <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="userType"
-                value="user"
-                checked={userType === "user"}
-                onChange={(e) => setUserType(e.target.value)}
-                style={{ marginRight: "8px" }}
-              />
-              Regular User
-            </label>
-            <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-              <input
-                type="radio"
-                name="userType"
-                value="manager"
-                checked={userType === "manager"}
-                onChange={(e) => setUserType(e.target.value)}
-                style={{ marginRight: "8px" }}
-              />
-              Manager
-            </label>
-          </div>
-        </Collapsible>
-
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label>Email</label>
