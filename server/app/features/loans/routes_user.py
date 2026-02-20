@@ -10,11 +10,11 @@ from app.features.users.schema import UserCreate,UserRead
 from app.core.security import get_current_user
 from dependencies import get_db
 from app.features.loans.models import UserLoanApplication,BankLoan
-from app.features.loans.schema import BankLoanBase, UserLoanApplicationCreate,UserLoanApplicationResponse
+from app.features.loans.schema import BankLoanBase, UserLoanApplicationCreate,UserLoanApplicationResponse,BankLoanRead
 
 router = APIRouter(prefix="/loans",tags=["Loans"])
 
-@router.get("/",response_model=list[BankLoanBase],status_code=status.HTTP_200_OK)
+@router.get("/",response_model=list[BankLoanRead],status_code=status.HTTP_200_OK)
 async def get_user_loans(db: AsyncSession = Depends(get_db)):
     stmt = select(BankLoan).where(BankLoan.is_active == True)
     result = await db.execute(stmt)
