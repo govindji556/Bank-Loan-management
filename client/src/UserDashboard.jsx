@@ -1,36 +1,38 @@
-import React, { useState } from "react";
-import { apiPost } from "./services/apiService.js";
+import React, { useState, useEffect } from "react";
+import { apiPost, apiGet } from "./services/apiService.js";
 
 export default function UserDashboard({ user, onLogout }) {
-  const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  const [availableLoans, setAvailableLoans] = useState([]);
+  const [applyAmounts, setApplyAmounts] = useState({});
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!amount) {
-      setError("Please enter loan amount");
-      return;
-    }
-    if (amount <= 0) {
-      setError("Loan amount must be greater than 0");
-      return;
-    }
+  useEffect(() => { fetchAvailableLoans(); }, []);
 
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
+  const fetchAvailableLoans = async () => {
     try {
-      await apiPost("/loans/request", {
-        user_id: user.id,
-        amount: parseFloat(amount),
-      });
-      
+      const data = await apiGet("/loans/");
+      console.log("Available loans:", data);
+      setAvailableLoans(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleApply = async (loanId, amountValue) => {
+    const amount = parseFloat(amountValue);
+    if (!amount || amount <= 0) {
+      setError("Please enter a valid amount");
+      return;
+    }
+    setLoading(true); setError(""); setSuccess("");
+    try {
+      await apiPost(`/loans/apply`, { loan_id: loanId, amount });
       setSuccess("Loan request submitted successfully!");
-      setAmount("");
+      setApplyAmounts(prev => ({ ...prev, [loanId]: "" }));
       setTimeout(() => setSuccess(""), 3000);
+      fetchAvailableLoans();
     } catch (err) {
       setError(err.message || "Failed to submit loan request");
     } finally {
@@ -48,25 +50,38 @@ export default function UserDashboard({ user, onLogout }) {
       <div className="user-dashboard">
         <h2>Welcome, {user.name}</h2>
 
-        <form onSubmit={handleSubmit} style={{ maxWidth: "400px", margin: "30px auto" }}>
-          {error && <div className="alert error">{error}</div>}
-          {success && <div className="alert success">{success}</div>}
-          
-          <div className="form-group">
-            <label>Loan Amount (₹)</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter loan amount"
-              min="1"
-              disabled={loading}
-            />
-          </div>
-          <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Request Loan"}
-          </button>
-        </form>
+        {error && <div className="alert error">{error}</div>}
+        {success && <div className="alert success">{success}</div>}
+
+        <h3>Available Loans</h3>
+        <div style={{ display: 'grid', gap: 12 }}>
+          {availableLoans.map((loan, idx) => {
+            const inputKey = loan.id ?? `idx-${idx}`;
+            return (
+              <div key={loan.id ?? inputKey} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong>{loan.name}</strong>
+                  <div>Interest: {loan.interest_rate}%</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={applyAmounts[inputKey] || ''}
+                    onChange={(e) => setApplyAmounts(prev => ({ ...prev, [inputKey]: e.target.value }))}
+                  />
+                  <button
+                    className="btn"
+                    onClick={() => loan.id ? handleApply(loan.id, applyAmounts[inputKey]) : null}
+                    disabled={loading || !loan.id}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

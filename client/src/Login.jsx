@@ -53,16 +53,34 @@ export default function Login({ onLogin }) {
       const data = await apiPost("/auth/login", formData, true);
 
       // Store access token in localStorage
-      localStorage.setItem("accessToken", data.access_token);
-      
-      // Store user data (excluding token)
-      const userData = { 
-        email: data.email, 
-        id: data.id, 
-        name: data.name, 
-        role: data.role 
-      };
-      onLogin(userData);
+      if (data.access_token) {
+        localStorage.setItem("accessToken", data.access_token);
+      }
+
+      // Determine user profile: either returned directly or fetched from /auth/me
+      let userProfile = null;
+      if (data.email || data.id || data.role) {
+        userProfile = {
+          email: data.email,
+          id: data.id,
+          name: data.name,
+          role: data.role,
+        };
+      } else {
+        // fetch profile using saved token
+        try {
+          const { apiGet } = await import("./services/apiService.js");
+          userProfile = await apiGet("/users/me");
+        } catch (err) {
+          // if profile fetch fails, clear token and show error
+          localStorage.removeItem("accessToken");
+          throw new Error("Failed to fetch user profile");
+        }
+      }
+
+      // persist and set user
+      localStorage.setItem("user", JSON.stringify(userProfile));
+      onLogin(userProfile);
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.message || "Connection error. Please try again.");

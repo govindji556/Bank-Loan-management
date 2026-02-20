@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Collapsible from "./Collapsible";
 import { apiGet, apiPut } from "./services/apiService.js";
+import ManagerLoans from "./ManagerLoans";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
@@ -14,7 +15,7 @@ export default function ManagerDashboard({ user, onLogout }) {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const data = await apiGet("/loan-requests");
+      const data = await apiGet("/manager/loans/applications");
       setRequests(data);
     } catch (err) {
       console.error("Error fetching requests:", err);
@@ -25,7 +26,7 @@ export default function ManagerDashboard({ user, onLogout }) {
 
   const updateStatus = async (id, status) => {
     try {
-      await apiPut(`/loan/${id}/${status}`);
+      await apiPut(`/manager/loans/applications/${id}`, { status });
       setRequests(requests.map(r =>
         r.id === id ? { ...r, status } : r
       ));
@@ -40,6 +41,13 @@ export default function ManagerDashboard({ user, onLogout }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>Manager Dashboard</h1>
         <button className="logout-btn" onClick={onLogout}>Logout</button>
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <button className="btn" onClick={() => setIsOpen(false)}>Manage Loans</button>
+          <button className="btn" onClick={() => setIsOpen(true)}>Loan Requests</button>
+        </div>
       </div>
 
       <div className="collapsible-section">
@@ -91,6 +99,11 @@ export default function ManagerDashboard({ user, onLogout }) {
           </div>
         </Collapsible>
       </div>
+      { !isOpen && (
+        <div style={{ marginTop: 20 }}>
+          <ManagerLoans />
+        </div>
+      )}
     </div>
   );
 }

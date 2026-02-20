@@ -8,11 +8,22 @@ import ProtectedRoute from "./ProtectedRoute";
 import "./styles.css";
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed.role === "admin") parsed.role = "manager";
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  });
 
   const handleLogout = () => {
     // Clear access token from localStorage
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
     setUser(null);
   };
   
@@ -26,10 +37,10 @@ export default function App() {
         element={
           <ProtectedRoute user={user}>
             {user?.role === "manager" ? (
-              <ManagerDashboard user={user} onLogout={handleLogout} />
-            ) : (
-              <UserDashboard user={user} onLogout={handleLogout} />
-            )}
+                <ManagerDashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <UserDashboard user={user} onLogout={handleLogout} />
+              )}
           </ProtectedRoute>
         }
       />
