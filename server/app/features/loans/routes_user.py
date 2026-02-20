@@ -37,7 +37,7 @@ async def get_user_loan_application(application_id: int, db: AsyncSession = Depe
         raise HTTPException(status_code=404, detail="Loan application not found")
     return application
 
-@router.post("/apply/{loan_id}",response_model=UserLoanApplicationResponse,status_code=status.HTTP_201_CREATED)
+@router.post("/apply",response_model=UserLoanApplicationResponse,status_code=status.HTTP_201_CREATED)
 async def apply_for_loan( application_data: UserLoanApplicationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     loan_id = application_data.loan_id
     # 1. Check if the loan exists and is active
@@ -51,12 +51,13 @@ async def apply_for_loan( application_data: UserLoanApplicationCreate, db: Async
     application = UserLoanApplication(
         userId=current_user.id,
         loanId=loan_id,
-        amount=application_data.amount, 
-        status="pending"
+        amount=application_data.amount
     )
+    print("application:", application)
     # handle duplicate application error if user has already applied for the same loan
     existing_stmt = select(UserLoanApplication).where(UserLoanApplication.userId == current_user.id, UserLoanApplication.loanId == loan_id)
     existing_result = await db.execute(existing_stmt)
+    print("existing_result:", existing_result)
     existing_application = existing_result.scalar_one_or_none()
     if existing_application:
         raise HTTPException(status_code=400, detail="You have already applied for this loan")
@@ -67,3 +68,5 @@ async def apply_for_loan( application_data: UserLoanApplicationCreate, db: Async
     full_application = result.scalar_one()
     
     return full_application
+
+
