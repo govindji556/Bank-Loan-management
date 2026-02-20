@@ -24,11 +24,12 @@ class UserLoanApplication(Base):
     __tablename__ = "user_loan_applications"
 
     id:Mapped[int]=mapped_column(primary_key=True,index=True)
-    userId:Mapped[int]=mapped_column(ForeignKey("users.id",ondelete="CASCADE"),primary_key=True)
-    loanId:Mapped[int]=mapped_column(ForeignKey("bank_loans.id",ondelete="CASCADE"),primary_key=True)
+    userId:Mapped[int]=mapped_column(ForeignKey("users.id",ondelete="CASCADE"))
+    loanId:Mapped[int]=mapped_column(ForeignKey("bank_loans.id",ondelete="CASCADE"))
 
     amount:Mapped[int]=mapped_column(Float)
     status:Mapped[LoanStatus]=mapped_column(SQLAEnum(LoanStatus),default=LoanStatus.PENDING)
 
     user: Mapped["User"] = relationship("User", back_populates="loan_applications")
     loan: Mapped["BankLoan"] = relationship("BankLoan", back_populates="applicant_links")
+
