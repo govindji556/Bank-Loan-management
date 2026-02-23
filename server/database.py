@@ -20,3 +20,4 @@ Base = declarative_base()
 
 from app.features.users.models import User
 from app.features.loans.models import BankLoan, UserLoanApplication
+from app.features.notifications.models import Notification

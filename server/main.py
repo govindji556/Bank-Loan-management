@@ -7,6 +7,7 @@ from app.features.auth.router import router as auth_router
 from app.features.users.router import router as users_router
 from app.features.loans.routes_user import router as user_loans_router
 from app.features.loans.routes_manager import router as manager_loans_router
+from app.features.notifications.router import router as notifications_router
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
@@ -35,6 +36,8 @@ app.include_router(users_router)
 
 app.include_router(user_loans_router)
 app.include_router(manager_loans_router)
+
+app.include_router(notifications_router)
 
 @app.get("/")
 async def index():
