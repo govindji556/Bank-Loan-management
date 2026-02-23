@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
@@ -11,6 +11,7 @@ from app.core.security import get_current_user
 from dependencies import get_db
 from app.features.loans.models import UserLoanApplication,BankLoan
 from app.features.loans.schema import BankLoanBase, UserLoanApplicationCreate,UserLoanApplicationResponse,BankLoanRead
+from app.features.notifications.tasks import notify_managers_of_new_loan
 
 router = APIRouter(prefix="/loans",tags=["Loans"])
 
@@ -37,36 +38,43 @@ async def get_user_loan_application(application_id: int, db: AsyncSession = Depe
         raise HTTPException(status_code=404, detail="Loan application not found")
     return application
 
-@router.post("/apply",response_model=UserLoanApplicationResponse,status_code=status.HTTP_201_CREATED)
-async def apply_for_loan( application_data: UserLoanApplicationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.post("/apply", response_model=UserLoanApplicationResponse, status_code=status.HTTP_201_CREATED)
+async def apply_for_loan(
+    application_data: UserLoanApplicationCreate, 
+    background_tasks: BackgroundTasks, 
+    db: AsyncSession = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
     loan_id = application_data.loan_id
-    # 1. Check if the loan exists and is active
+    
     stmt = select(BankLoan).where(BankLoan.id == loan_id, BankLoan.is_active == True)
-    result = await db.execute(stmt)
-    loan = result.scalar_one_or_none()
+    loan = (await db.execute(stmt)).scalar_one_or_none()
     if not loan:
         raise HTTPException(status_code=404, detail="Loan not found or not active")
     
-    # 2. Create a new UserLoanApplication
+    existing_stmt = select(UserLoanApplication).where(
+        UserLoanApplication.user_id == current_user.id, 
+        UserLoanApplication.loan_id == loan_id
+    )
+    if (await db.execute(existing_stmt)).scalar_one_or_none():
+        raise HTTPException(status_code=400, detail="You have already applied for this loan")
+
     application = UserLoanApplication(
-        userId=current_user.id,
-        loanId=loan_id,
+        user_id=current_user.id,
+        loan_id=loan_id,
         amount=application_data.amount
     )
-    print("application:", application)
-    # handle duplicate application error if user has already applied for the same loan
-    existing_stmt = select(UserLoanApplication).where(UserLoanApplication.userId == current_user.id, UserLoanApplication.loanId == loan_id)
-    existing_result = await db.execute(existing_stmt)
-    print("existing_result:", existing_result)
-    existing_application = existing_result.scalar_one_or_none()
-    if existing_application:
-        raise HTTPException(status_code=400, detail="You have already applied for this loan")
     db.add(application)
     await db.commit()
-    stmt = select(UserLoanApplication).options(selectinload(UserLoanApplication.loan)).where(UserLoanApplication.userId == current_user.id, UserLoanApplication.loanId == loan_id)
-    result = await db.execute(stmt)
-    full_application = result.scalar_one()
+    await db.refresh(application)
+
+    background_tasks.add_task(
+        notify_managers_of_new_loan, 
+        user_email=current_user.email, 
+        application_id=application.id
+    )
+    
+    stmt_final = select(UserLoanApplication).options(selectinload(UserLoanApplication.loan)).where(UserLoanApplication.id == application.id)
+    full_application = (await db.execute(stmt_final)).scalar_one()
     
     return full_application
-
-

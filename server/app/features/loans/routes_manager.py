@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from typing import Annotated
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,6 +11,8 @@ from app.features.loans.models import UserLoanApplication,BankLoan
 from app.features.loans.schema import BankLoanCreate,BankLoanRead, UserLoanApplicationResponse,UserLoanApplicationUpdate
 from app.core.security import get_current_user,RequireRole
 from dependencies import get_db
+from app.features.notifications.models import Notification
+from app.features.notifications.tasks import notify_user_of_update
 
 router = APIRouter(prefix="/manager/loans",dependencies=[Depends(RequireRole.manager)], tags=["Manager Loans"])
 
@@ -60,14 +62,33 @@ async def get_all_loan_applications(status: str = None, db: AsyncSession = Depen
     result = await db.execute(stmt)
     return result.scalars().all()
 
-@router.put("/applications/{application_id}",response_model=UserLoanApplicationResponse,status_code=status.HTTP_200_OK)
-async def update_loan_application_status(application_id: int, application_data: UserLoanApplicationUpdate, db: AsyncSession = Depends(get_db)):
+@router.put("/applications/{application_id}", response_model=UserLoanApplicationResponse, status_code=status.HTTP_200_OK)
+async def update_loan_application_status(
+    application_id: int, 
+    application_data: UserLoanApplicationUpdate, 
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
+):
     stmt = select(UserLoanApplication).options(selectinload(UserLoanApplication.loan)).where(UserLoanApplication.id == application_id)
-    result = await db.execute(stmt)
-    application = result.scalar_one_or_none()
+    application = (await db.execute(stmt)).scalar_one_or_none()
+    
     if not application:
         raise HTTPException(status_code=404, detail="Loan application not found")
+        
     application.status = application_data.status
+
+    notification_stmt = update(Notification).where(
+        Notification.reference_id == f"loan_app_{application_id}" 
+    ).values(is_read=True)
+    await db.execute(notification_stmt)
+
     await db.commit()
     await db.refresh(application)
+
+    background_tasks.add_task(
+        notify_user_of_update, 
+        user_id=application.user_id, 
+        status=application_data.status
+    )
+
     return application
