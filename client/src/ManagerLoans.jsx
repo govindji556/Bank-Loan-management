@@ -1,0 +1,87 @@
+import React, { useState, useEffect } from "react";
+import { apiGet, apiPost, apiPut, apiDelete } from "./services/apiService.js";
+
+export default function ManagerLoans() {
+  const [loans, setLoans] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [interestRate, setInterestRate] = useState(0);
+  const [editing, setEditing] = useState(null);
+
+  const fetchLoans = async () => {
+    try {
+      setLoading(true);
+      const data = await apiGet("/manager/loans/");
+      setLoans(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchLoans(); }, []);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = { name, interest_rate: parseFloat(interestRate) };
+      if (editing) {
+        await apiPut(`/manager/loans/${editing}`, payload);
+        setEditing(null);
+      } else {
+        await apiPost(`/manager/loans/`, payload);
+      }
+      setName(""); setInterestRate(0);
+      fetchLoans();
+    } catch (err) {
+      alert(err.message || "Failed to save loan");
+    }
+  };
+
+  const startEdit = (loan) => {
+    setEditing(loan.id);
+    setName(loan.name);
+    setInterestRate(loan.interest_rate || 0);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this loan?")) return;
+    try {
+      await apiDelete(`/manager/loans/${id}`);
+      fetchLoans();
+    } catch (err) {
+      alert(err.message || "Failed to delete loan");
+    }
+  };
+
+  return (
+    <div>
+      <h2>Manage Loans (CRUD)</h2>
+      <form onSubmit={handleCreate} style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+        <input placeholder="Loan name" value={name} onChange={(e) => setName(e.target.value)} />
+        <input placeholder="Interest rate" type="number" step="0.01" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} />
+        <button className="btn" type="submit">{editing ? "Update" : "Create"}</button>
+        {editing && <button type="button" onClick={() => { setEditing(null); setName(""); setInterestRate(0); }}>Cancel</button>}
+      </form>
+
+      {loading ? <div>Loading...</div> : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {loans.map(l => (
+            <div key={l.id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <strong>{l.name}</strong>
+                <div>Interest: {l.interest_rate}%</div>
+                <div>Active: {l.is_active ? 'Yes' : 'No'}</div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn" onClick={() => startEdit(l)}>Edit</button>
+                <button className="btn" onClick={() => handleDelete(l.id)} style={{ background: '#dc3545' }}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -12,3 +12,4 @@ env/
 
 # Ignore Environment Variables (CRITICAL!)
 .env
+bank_loan_db.db
