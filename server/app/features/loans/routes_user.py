@@ -53,15 +53,15 @@ async def apply_for_loan(
         raise HTTPException(status_code=404, detail="Loan not found or not active")
     
     existing_stmt = select(UserLoanApplication).where(
-        UserLoanApplication.user_id == current_user.id, 
-        UserLoanApplication.loan_id == loan_id
+        UserLoanApplication.userId == current_user.id, 
+        UserLoanApplication.loanId == loan_id
     )
     if (await db.execute(existing_stmt)).scalar_one_or_none():
         raise HTTPException(status_code=400, detail="You have already applied for this loan")
 
     application = UserLoanApplication(
-        user_id=current_user.id,
-        loan_id=loan_id,
+        userId=current_user.id,
+        loanId=loan_id,
         amount=application_data.amount
     )
     db.add(application)

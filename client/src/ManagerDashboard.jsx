@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import Collapsible from "./Collapsible";
 import { apiGet, apiPut } from "./services/apiService.js";
 import ManagerLoans from "./ManagerLoans";
+import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
+import NotificationToast from "./components/NotificationToast.jsx";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
   const [isOpen, setIsOpen] = useState(true);
   const [loading, setLoading] = useState(true);
+  const { notifications, removeNotification } = useNotificationPolling(15000);
 
   useEffect(() => {
     fetchRequests();
@@ -42,6 +45,14 @@ export default function ManagerDashboard({ user, onLogout }) {
         <h1>Manager Dashboard</h1>
         <button className="logout-btn" onClick={onLogout}>Logout</button>
       </div>
+
+      {notifications.map(notif => (
+        <NotificationToast
+          key={notif.id}
+          notification={notif}
+          onClose={() => removeNotification(notif.id)}
+        />
+      ))}
 
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>

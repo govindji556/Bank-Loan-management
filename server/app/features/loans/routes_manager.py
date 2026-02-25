@@ -87,7 +87,7 @@ async def update_loan_application_status(
 
     background_tasks.add_task(
         notify_user_of_update, 
-        user_id=application.user_id, 
+        user_id=application.userId, 
         status=application_data.status
     )
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { apiPost, apiGet } from "./services/apiService.js";
+import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
+import NotificationToast from "./components/NotificationToast.jsx";
 
 export default function UserDashboard({ user, onLogout }) {
   const [error, setError] = useState("");
@@ -7,6 +9,7 @@ export default function UserDashboard({ user, onLogout }) {
   const [success, setSuccess] = useState("");
   const [availableLoans, setAvailableLoans] = useState([]);
   const [applyAmounts, setApplyAmounts] = useState({});
+  const { notifications, removeNotification } = useNotificationPolling(10000);
 
   useEffect(() => { fetchAvailableLoans(); }, []);
 
@@ -46,6 +49,14 @@ export default function UserDashboard({ user, onLogout }) {
         <h1>User Dashboard</h1>
         <button className="logout-btn" onClick={onLogout}>Logout</button>
       </div>
+
+      {notifications.map(notif => (
+        <NotificationToast
+          key={notif.id}
+          notification={notif}
+          onClose={() => removeNotification(notif.id)}
+        />
+      ))}
 
       <div className="user-dashboard">
         <h2>Welcome, {user.name}</h2>
