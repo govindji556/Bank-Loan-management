@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { apiPost, apiGet } from "./services/apiService.js";
 import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
-import NotificationToast from "./components/NotificationToast.jsx";
-import NotificationsList from "./components/NotificationsList.jsx";
+import NotificationToast from "./NotificationToast.jsx";
+import NotificationsList from "./NotificationsList.jsx";
 
 export default function UserDashboard({ user, onLogout }) {
   const [error, setError] = useState("");

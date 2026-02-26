@@ -3,8 +3,8 @@ import Collapsible from "./Collapsible";
 import { apiGet, apiPut } from "./services/apiService.js";
 import ManagerLoans from "./ManagerLoans";
 import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
-import NotificationToast from "./components/NotificationToast.jsx";
-import NotificationsList from "./components/NotificationsList.jsx";
+import NotificationToast from "./NotificationToast.jsx";
+import NotificationsList from "./NotificationsList.jsx";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);

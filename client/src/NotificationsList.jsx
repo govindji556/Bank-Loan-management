@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { apiGet, apiPatch } from "../services/apiService.js";
+import { apiGet, apiPatch } from "./services/apiService.js";
 
 export default function NotificationsList({ userRole, onNotificationRemoved }) {
   const [notifications, setNotifications] = useState([]);
