@@ -58,11 +58,44 @@ export default function ManagerLoans() {
   return (
     <div>
       <h2>Manage Loans (CRUD)</h2>
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-        <input placeholder="Loan name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input placeholder="Interest rate" type="number" step="0.01" value={interestRate} onChange={(e) => setInterestRate(e.target.value)} />
-        <button className="btn" type="submit">{editing ? "Update" : "Create"}</button>
-        {editing && <button type="button" onClick={() => { setEditing(null); setName(""); setInterestRate(0); }}>Cancel</button>}
+      <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 15, marginBottom: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15 }}>
+          <div className="form-group">
+            <label>Loan Name</label>
+            <input 
+              type="text"
+              placeholder="Enter loan name" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+          <div className="form-group">
+            <label>Interest Rate (%)</label>
+            <input 
+              placeholder="Enter interest rate" 
+              type="number" 
+              step="0.01" 
+              value={interestRate} 
+              onChange={(e) => setInterestRate(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 12 }}>
+          <button className="btn" type="submit" disabled={loading} style={{ width: 'auto', padding: '12px 24px' }}>
+            {editing ? "Update Loan" : "Create Loan"}
+          </button>
+          {editing && (
+            <button 
+              type="button" 
+              onClick={() => { setEditing(null); setName(""); setInterestRate(0); }}
+              style={{ width: 'auto', padding: '12px 24px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: '600' }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       {loading ? <div>Loading...</div> : (
@@ -75,8 +108,8 @@ export default function ManagerLoans() {
                 <div>Active: {l.is_active ? 'Yes' : 'No'}</div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn" onClick={() => startEdit(l)}>Edit</button>
-                <button className="btn" onClick={() => handleDelete(l.id)} style={{ background: '#dc3545' }}>Delete</button>
+                <button className="btn" onClick={() => startEdit(l)} style={{ width: 'auto', padding: '8px 16px' }}>Edit</button>
+                <button className="btn" onClick={() => handleDelete(l.id)} style={{ background: '#dc3545', width: 'auto', padding: '8px 16px' }}>Delete</button>
               </div>
             </div>
           ))}

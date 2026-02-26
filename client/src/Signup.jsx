@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { apiPost } from "./services/apiService.js";
+import { apiPostEncrypted } from "./services/apiService.js";
 import Collapsible from "./Collapsible";
 
 export default function Signup() {
@@ -84,7 +84,13 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      await apiPost("/auth/register", { email, name, password, role: userType });
+      // Send encrypted register request
+      await apiPostEncrypted("/auth/register-encrypted", {
+        email,
+        name,
+        password,
+        role: userType
+      });
       
       setEmail("");
       setName("");

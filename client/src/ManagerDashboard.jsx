@@ -4,6 +4,7 @@ import { apiGet, apiPut } from "./services/apiService.js";
 import ManagerLoans from "./ManagerLoans";
 import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
 import NotificationToast from "./components/NotificationToast.jsx";
+import NotificationsList from "./components/NotificationsList.jsx";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
@@ -13,6 +14,9 @@ export default function ManagerDashboard({ user, onLogout }) {
 
   useEffect(() => {
     fetchRequests();
+    // Auto-refresh requests every 10 seconds
+    const interval = setInterval(fetchRequests, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchRequests = async () => {
@@ -53,6 +57,8 @@ export default function ManagerDashboard({ user, onLogout }) {
           onClose={() => removeNotification(notif.id)}
         />
       ))}
+
+      <NotificationsList userRole="manager" onNotificationRemoved={fetchRequests} />
 
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>

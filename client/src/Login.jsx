@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { apiPost } from "./services/apiService.js";
+import { apiPostEncrypted } from "./services/apiService.js";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -47,36 +47,24 @@ export default function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("username", email);
-      formData.append("password", password);
-      const data = await apiPost("/auth/login", formData, true);
+      // Send encrypted login request
+      const data = await apiPostEncrypted("/auth/login-encrypted", {
+        username: email,
+        password: password
+      });
 
       // Store access token in localStorage
       if (data.access_token) {
         localStorage.setItem("accessToken", data.access_token);
       }
 
-      // Determine user profile: either returned directly or fetched from /auth/me
-      let userProfile = null;
-      if (data.email || data.id || data.role) {
-        userProfile = {
-          email: data.email,
-          id: data.id,
-          name: data.name,
-          role: data.role,
-        };
-      } else {
-        // fetch profile using saved token
-        try {
-          const { apiGet } = await import("./services/apiService.js");
-          userProfile = await apiGet("/users/me");
-        } catch (err) {
-          // if profile fetch fails, clear token and show error
-          localStorage.removeItem("accessToken");
-          throw new Error("Failed to fetch user profile");
-        }
-      }
+      // Use returned user profile
+      const userProfile = {
+        email: data.email,
+        id: data.id,
+        name: data.name,
+        role: data.role,
+      };
 
       // persist and set user
       localStorage.setItem("user", JSON.stringify(userProfile));
