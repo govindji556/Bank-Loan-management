@@ -75,21 +75,17 @@ class EncryptionManager:
                     label=None
                 )
             )
-            print("[DEBUG] AES key decrypted using OAEP")
             return decrypted.decode('utf-8')
         except Exception as e:
             last_exc = e
-            print(f"[DEBUG] OAEP decryption failed: {str(e)} - attempting PKCS1v15 fallback")
 
         try:
             decrypted = self.private_key.decrypt(
                 encrypted_bytes,
                 padding.PKCS1v15()
             )
-            print("[DEBUG] AES key decrypted using PKCS1v15 (fallback)")
             return decrypted.decode('utf-8')
         except Exception as e2:
-            print(f"[ERROR] PKCS1v15 decryption also failed: {str(e2)}")
             raise ValueError(f"Failed to decrypt AES key (OAEP error: {last_exc}; PKCS1v15 error: {e2})")
     
     def decrypt_payload(self, encrypted_payload: str, aes_key_str: str) -> dict:

@@ -17,7 +17,6 @@ export default function UserDashboard({ user, onLogout }) {
   const fetchAvailableLoans = async () => {
     try {
       const data = await apiGet("/loans/");
-      console.log("Available loans:", data);
       setAvailableLoans(data);
     } catch (err) {
       console.error(err);
