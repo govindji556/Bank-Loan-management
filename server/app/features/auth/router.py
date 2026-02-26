@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.features.users.models import User
 from app.features.users.schema import UserCreate,UserRead
 from app.core.security import get_password_hash, verify_password, create_access_token
+from app.core.encryption import encryption_manager
 from dependencies import get_db
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -50,3 +51,10 @@ async def login_user(
     access_token = create_access_token(data={"sub": user.email})
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/public-key")
+async def get_public_key():
+    """Endpoint to fetch the server's RSA public key for client-side encryption"""
+    return {
+        "public_key": encryption_manager.get_public_key_pem()
+    }

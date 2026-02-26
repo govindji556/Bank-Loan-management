@@ -1,3 +1,5 @@
+import { fetchPublicKey, prepareEncryptedPayload } from "../utils/encryption.js";
+
 const API_BASE_URL = "http://localhost:8000";
 
 /**
@@ -94,4 +96,28 @@ const handleResponse = async (response) => {
   }
 
   return data;
+};
+
+/**
+ * POST request with RSA+AES encryption
+ */
+export const apiPostEncrypted = async (endpoint, body = null) => {
+  try {
+    // Fetch server's public key
+    const publicKey = await fetchPublicKey(API_BASE_URL);
+    
+    // Prepare encrypted payload
+    const encryptedPayload = await prepareEncryptedPayload(body, API_BASE_URL, publicKey);
+    
+    // Send encrypted request
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(encryptedPayload),
+    });
+    
+    return await handleResponse(response);
+  } catch (error) {
+    throw new Error(`POST ${endpoint} failed: ${error.message}`);
+  }
 };
