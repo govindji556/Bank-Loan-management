@@ -4,6 +4,7 @@ import { apiGet, apiPut } from "./services/apiService.js";
 import ManagerLoans from "./ManagerLoans";
 import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
 import NotificationToast from "./components/NotificationToast.jsx";
+import NotificationsList from "./components/NotificationsList.jsx";
 
 export default function ManagerDashboard({ user, onLogout }) {
   const [requests, setRequests] = useState([]);
@@ -53,6 +54,8 @@ export default function ManagerDashboard({ user, onLogout }) {
           onClose={() => removeNotification(notif.id)}
         />
       ))}
+
+      <NotificationsList userRole="manager" />
 
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>

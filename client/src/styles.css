@@ -38,6 +38,7 @@ input[type="text"], input[type="email"], input[type="password"],input[type="numb
 }
 
 input:focus, select:focus { outline: none; border-color: #667eea; }
+input:disabled { background-color: #f5f5f5; cursor: not-allowed; }
 
 .btn {
   width: 100%;

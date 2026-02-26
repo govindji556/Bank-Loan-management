@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { apiPost, apiGet } from "./services/apiService.js";
 import { useNotificationPolling } from "./hooks/useNotificationPolling.js";
 import NotificationToast from "./components/NotificationToast.jsx";
+import NotificationsList from "./components/NotificationsList.jsx";
 
 export default function UserDashboard({ user, onLogout }) {
   const [error, setError] = useState("");
@@ -58,6 +59,8 @@ export default function UserDashboard({ user, onLogout }) {
         />
       ))}
 
+      <NotificationsList userRole="user" />
+
       <div className="user-dashboard">
         <h2>Welcome, {user.name}</h2>
 
@@ -75,16 +78,20 @@ export default function UserDashboard({ user, onLogout }) {
                   <div>Interest: {loan.interest_rate}%</div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <input
-                    type="number"
-                    placeholder="Amount"
-                    value={applyAmounts[inputKey] || ''}
-                    onChange={(e) => setApplyAmounts(prev => ({ ...prev, [inputKey]: e.target.value }))}
-                  />
+                  <div className="form-group" style={{ marginBottom: 0, width: '150px' }}>
+                    <input
+                      type="number"
+                      placeholder="Amount"
+                      value={applyAmounts[inputKey] || ''}
+                      onChange={(e) => setApplyAmounts(prev => ({ ...prev, [inputKey]: e.target.value }))}
+                      disabled={loading}
+                    />
+                  </div>
                   <button
                     className="btn"
                     onClick={() => loan.id ? handleApply(loan.id, applyAmounts[inputKey]) : null}
                     disabled={loading || !loan.id}
+                    style={{ width: 'auto', padding: '12px 24px' }}
                   >
                     Apply
                   </button>
