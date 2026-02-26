@@ -75,16 +75,26 @@ async def login_user_encrypted(
     Encrypted login endpoint.
     Expects encrypted JSON with 'username' and 'password' fields.
     """
+    print(f"[DEBUG] Login-encrypted request received")
+    print(f"[DEBUG] Encrypted key present: {bool(encrypted_req.encrypted_key)}")
+    print(f"[DEBUG] Encrypted payload present: {bool(encrypted_req.encrypted_payload)}")
+    
     try:
         # Decrypt the AES key
+        print(f"[DEBUG] Decrypting AES key...")
         aes_key = encryption_manager.decrypt_aes_key(encrypted_req.encrypted_key)
+        print(f"[DEBUG] AES key decrypted successfully")
         
         # Decrypt the payload
+        print(f"[DEBUG] Decrypting payload...")
         decrypted_data = encryption_manager.decrypt_payload(encrypted_req.encrypted_payload, aes_key)
+        print(f"[DEBUG] Payload decrypted: {list(decrypted_data.keys())}")
         
         # Extract email and password from decrypted data
         email = decrypted_data.get("username") or decrypted_data.get("email")
         password = decrypted_data.get("password")
+        
+        print(f"[DEBUG] Email: {email}, Password present: {bool(password)}")
         
         if not email or not password:
             raise HTTPException(
@@ -98,11 +108,14 @@ async def login_user_encrypted(
         user = result.scalar_one_or_none()
         
         if not user or not verify_password(password, user.password):
+            print(f"[DEBUG] Auth failed: user={user is not None}, password_match={user and verify_password(password, user.password)}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        
+        print(f"[DEBUG] Authentication successful for user: {user.email}")
         
         # Create and return JWT Token
         access_token = create_access_token(data={"sub": user.email})
@@ -115,7 +128,12 @@ async def login_user_encrypted(
             "role": user.role
         }
         
-    except ValueError as e:
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Login-encrypted error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Decryption failed: {str(e)}"
