@@ -33,21 +33,32 @@ export const generateAESKey = () => {
 /**
  * Encrypt payload with AES (simple version - just encrypt the JSON)
  */
-export const encryptWithAES = (data, aesKey) => {
+export const encryptWithAES = (data, aesKeyStr) => {
   try {
     console.log('[Encryption] Encrypting payload with AES');
-    const jsonStr = JSON.stringify(data);
+    console.log('[Encryption] AES key type:', typeof aesKeyStr);
+    console.log('[Encryption] AES key length:', aesKeyStr.length);
     
-    const encrypted = CryptoJS.AES.encrypt(jsonStr, aesKey, {
-      mode: CryptoJS.mode.CBC,
+    const jsonStr = JSON.stringify(data);
+    console.log('[Encryption] JSON data length:', jsonStr.length);
+    
+    // aesKeyStr should be a Base64 string, need to convert it for CryptoJS
+    const encryptionKey = CryptoJS.enc.Base64.parse(aesKeyStr);
+    console.log('[Encryption] Encryption key parsed from Base64');
+    
+    const encrypted = CryptoJS.AES.encrypt(jsonStr, encryptionKey, {
+      mode: CryptoJS.mode.ECB,
       padding: CryptoJS.pad.Pkcs7,
     });
     
+    console.log('[Encryption] Encryption completed');
     const encryptedStr = encrypted.toString();
+    console.log('[Encryption] Encrypted string length:', encryptedStr.length);
     console.log('[Encryption] AES encryption successful');
     return encryptedStr;
   } catch (error) {
     console.error('[Encryption] AES Encryption error:', error);
+    console.error('[Encryption] Error details:', error.message);
     throw error;
   }
 };
@@ -185,21 +196,21 @@ export const prepareEncryptedPayload = async (data, baseUrl, publicKey) => {
     
     // Generate random AES key
     const aesKey = generateAESKey();
-    console.log('[Encryption] AES key generated, converting to string...');
+    console.log('[Encryption] AES key generated, converting to Base64 string...');
     
     // Convert AES key to Base64 string
     const aesKeyStr = aesKey.toString(CryptoJS.enc.Base64);
-    console.log('[Encryption] AES key converted to Base64');
+    console.log('[Encryption] AES key converted to Base64, length:', aesKeyStr.length);
     
-    // Encrypt payload with AES
+    // Encrypt payload with AES (pass the Base64 string)
     console.log('[Encryption] Encrypting payload...');
-    const encryptedPayload = encryptWithAES(data, aesKey);
-    console.log('[Encryption] Payload encrypted');
+    const encryptedPayload = encryptWithAES(data, aesKeyStr);
+    console.log('[Encryption] Payload encrypted, length:', encryptedPayload.length);
     
     // Encrypt AES key with server's RSA public key
     console.log('[Encryption] Encrypting AES key with RSA...');
     const encryptedKey = await encryptWithRSA(aesKeyStr, publicKey);
-    console.log('[Encryption] AES key encrypted with RSA');
+    console.log('[Encryption] AES key encrypted with RSA, length:', encryptedKey.length);
     
     console.log('[Encryption] Payload preparation complete');
     return {
@@ -208,6 +219,7 @@ export const prepareEncryptedPayload = async (data, baseUrl, publicKey) => {
     };
   } catch (error) {
     console.error('[Encryption] Error preparing encrypted payload:', error);
+    console.error('[Encryption] Error stack:', error.stack);
     throw error;
   }
 };
