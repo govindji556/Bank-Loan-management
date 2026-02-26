@@ -62,9 +62,21 @@ async def login_user(
 @router.get("/public-key")
 async def get_public_key():
     """Endpoint to fetch the server's RSA public key for client-side encryption"""
-    return {
-        "public_key": encryption_manager.get_public_key_pem()
-    }
+    try:
+        public_key_pem = encryption_manager.get_public_key_pem()
+        print(f"[DEBUG] Public key retrieved, length: {len(public_key_pem)}")
+        print(f"[DEBUG] Public key starts with: {public_key_pem[:50]}")
+        return {
+            "public_key": public_key_pem
+        }
+    except Exception as e:
+        print(f"[ERROR] Failed to get public key: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate public key: {str(e)}"
+        )
 
 @router.post("/login-encrypted")
 async def login_user_encrypted(
