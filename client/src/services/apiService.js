@@ -103,11 +103,18 @@ const handleResponse = async (response) => {
  */
 export const apiPostEncrypted = async (endpoint, body = null) => {
   try {
+    console.log('[Encrypted Request] Preparing request for:', endpoint);
+    
     // Fetch server's public key
     const publicKey = await fetchPublicKey(API_BASE_URL);
+    console.log('[Encrypted Request] Got public key');
     
     // Prepare encrypted payload
     const encryptedPayload = await prepareEncryptedPayload(body, API_BASE_URL, publicKey);
+    console.log('[Encrypted Request] Payload encrypted successfully:', {
+      encrypted_payload: encryptedPayload.encrypted_payload.substring(0, 50) + '...',
+      encrypted_key: encryptedPayload.encrypted_key ? encryptedPayload.encrypted_key.substring(0, 50) + '...' : 'null',
+    });
     
     // Send encrypted request
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -116,8 +123,10 @@ export const apiPostEncrypted = async (endpoint, body = null) => {
       body: JSON.stringify(encryptedPayload),
     });
     
+    console.log('[Encrypted Request] Response received, status:', response.status);
     return await handleResponse(response);
   } catch (error) {
+    console.error('[Encrypted Request] Error:', error);
     throw new Error(`POST ${endpoint} failed: ${error.message}`);
   }
 };

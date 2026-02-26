@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { apiGet, apiPut } from "../services/apiService.js";
 
-export default function NotificationsList({ userRole }) {
+export default function NotificationsList({ userRole, onNotificationRemoved }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
@@ -28,6 +28,10 @@ export default function NotificationsList({ userRole }) {
     try {
       await apiPut(`/notifications/${notificationId}/read`, {});
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      // Callback to parent to refresh data if needed
+      if (onNotificationRemoved) {
+        onNotificationRemoved();
+      }
     } catch (err) {
       console.error("Error marking as read:", err);
     }

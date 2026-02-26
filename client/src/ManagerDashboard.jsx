@@ -14,6 +14,9 @@ export default function ManagerDashboard({ user, onLogout }) {
 
   useEffect(() => {
     fetchRequests();
+    // Auto-refresh requests every 10 seconds
+    const interval = setInterval(fetchRequests, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchRequests = async () => {
@@ -55,7 +58,7 @@ export default function ManagerDashboard({ user, onLogout }) {
         />
       ))}
 
-      <NotificationsList userRole="manager" />
+      <NotificationsList userRole="manager" onNotificationRemoved={fetchRequests} />
 
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
