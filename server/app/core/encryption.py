@@ -61,6 +61,12 @@ class EncryptionManager:
         """Decrypt AES key using RSA private key"""
         try:
             encrypted_bytes = base64.b64decode(encrypted_key)
+        except Exception as e:
+            raise ValueError(f"Invalid base64 for encrypted AES key: {str(e)}")
+
+        # Try OAEP (preferred). If that fails, fall back to PKCS#1 v1.5
+        last_exc = None
+        try:
             decrypted = self.private_key.decrypt(
                 encrypted_bytes,
                 padding.OAEP(
@@ -69,9 +75,22 @@ class EncryptionManager:
                     label=None
                 )
             )
+            print("[DEBUG] AES key decrypted using OAEP")
             return decrypted.decode('utf-8')
         except Exception as e:
-            raise ValueError(f"Failed to decrypt AES key: {str(e)}")
+            last_exc = e
+            print(f"[DEBUG] OAEP decryption failed: {str(e)} - attempting PKCS1v15 fallback")
+
+        try:
+            decrypted = self.private_key.decrypt(
+                encrypted_bytes,
+                padding.PKCS1v15()
+            )
+            print("[DEBUG] AES key decrypted using PKCS1v15 (fallback)")
+            return decrypted.decode('utf-8')
+        except Exception as e2:
+            print(f"[ERROR] PKCS1v15 decryption also failed: {str(e2)}")
+            raise ValueError(f"Failed to decrypt AES key (OAEP error: {last_exc}; PKCS1v15 error: {e2})")
     
     def decrypt_payload(self, encrypted_payload: str, aes_key_str: str) -> dict:
         """
