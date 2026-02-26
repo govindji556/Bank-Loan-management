@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import JSEncrypt from 'jsencrypt';
 
 let serverPublicKey = null;
 
@@ -69,50 +70,23 @@ export const encryptWithAES = (data, aesKeyStr) => {
 export const encryptWithRSA = async (aesKeyStr, publicKeyPEM) => {
   try {
     console.log('[Encryption] RSA encryption starting...');
-    console.log('[Encryption] Checking JSEncrypt availability...');
-    
-    // Check if JSEncrypt is available
-    if (typeof window.JSEncrypt === 'undefined') {
-      console.log('[Encryption] JSEncrypt not found, loading from CDN...');
-      await loadJSEncrypt();
-      console.log('[Encryption] JSEncrypt loaded');
-    }
-    
-    console.log('[Encryption] JSEncrypt type:', typeof window.JSEncrypt);
     console.log('[Encryption] Creating JSEncrypt instance...');
     
-    let encryptor;
-    try {
-      encryptor = new window.JSEncrypt();
-      console.log('[Encryption] JSEncrypt instance created');
-    } catch (error) {
-      console.error('[Encryption] Failed to create JSEncrypt instance:', error);
-      throw new Error(`JSEncrypt instantiation failed: ${error.message}`);
-    }
+    const encryptor = new JSEncrypt();
+    console.log('[Encryption] JSEncrypt instance created');
     
     console.log('[Encryption] Setting public key...');
     console.log('[Encryption] Public key length:', publicKeyPEM.length);
     console.log('[Encryption] Public key starts with:', publicKeyPEM.substring(0, 50));
     
-    try {
-      encryptor.setPublicKey(publicKeyPEM);
-      console.log('[Encryption] Public key set successfully');
-    } catch (error) {
-      console.error('[Encryption] Failed to set public key:', error);
-      throw new Error(`setPublicKey failed: ${error.message}`);
-    }
+    encryptor.setPublicKey(publicKeyPEM);
+    console.log('[Encryption] Public key set successfully');
     
     console.log('[Encryption] Encrypting AES key with RSA...');
     console.log('[Encryption] AES key to encrypt length:', aesKeyStr.length);
     
-    let encrypted;
-    try {
-      encrypted = encryptor.encrypt(aesKeyStr);
-      console.log('[Encryption] RSA encryption completed');
-    } catch (error) {
-      console.error('[Encryption] Failed to encrypt with RSA:', error);
-      throw new Error(`RSA encryption failed: ${error.message}`);
-    }
+    const encrypted = encryptor.encrypt(aesKeyStr);
+    console.log('[Encryption] RSA encryption completed');
     
     if (!encrypted) {
       console.error('[Encryption] RSA encryption returned empty result');
@@ -126,65 +100,6 @@ export const encryptWithRSA = async (aesKeyStr, publicKeyPEM) => {
     console.error('[Encryption] Error message:', error.message);
     throw error;
   }
-};
-
-/**
- * Load JSEncrypt library from CDN
- */
-const loadJSEncrypt = () => {
-  return new Promise((resolve, reject) => {
-    try {
-      // Check if already loaded
-      if (typeof window.JSEncrypt !== 'undefined') {
-        console.log('[Encryption] JSEncrypt already loaded in window');
-        resolve();
-        return;
-      }
-      
-      console.log('[Encryption] Creating script tag for JSEncrypt...');
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/jsencrypt@3.3.4/bin/jsencrypt.min.js';
-      script.async = true;
-      
-      script.onload = () => {
-        console.log('[Encryption] JSEncrypt script onload fired');
-        
-        // Double-check that JSEncrypt is actually available
-        if (typeof window.JSEncrypt !== 'undefined') {
-          console.log('[Encryption] JSEncrypt verified in window object');
-          resolve();
-        } else {
-          console.error('[Encryption] JSEncrypt loaded but not in window');
-          reject(new Error('JSEncrypt loaded but not accessible in window'));
-        }
-      };
-      
-      script.onerror = (error) => {
-        console.error('[Encryption] Failed to load JSEncrypt from CDN:', error);
-        reject(new Error(`Failed to load JSEncrypt from CDN: ${error}`));
-      };
-      
-      script.onabort = () => {
-        console.error('[Encryption] JSEncrypt script load aborted');
-        reject(new Error('JSEncrypt script load aborted'));
-      };
-      
-      console.log('[Encryption] Appending script to head...');
-      document.head.appendChild(script);
-      
-      // Set a timeout in case the script never loads
-      setTimeout(() => {
-        if (typeof window.JSEncrypt === 'undefined') {
-          console.error('[Encryption] JSEncrypt failed to load within timeout');
-          reject(new Error('JSEncrypt failed to load within timeout'));
-        }
-      }, 5000);
-      
-    } catch (error) {
-      console.error('[Encryption] Error in loadJSEncrypt:', error);
-      reject(error);
-    }
-  });
 };
 
 /**

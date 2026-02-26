@@ -3,8 +3,8 @@ import base64
 from pathlib import Path
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-from cryptography.fernet import Fernet
 
 KEY_DIR = Path(__file__).parent.parent.parent / "keys"
 
@@ -74,18 +74,34 @@ class EncryptionManager:
             raise ValueError(f"Failed to decrypt AES key: {str(e)}")
     
     def decrypt_payload(self, encrypted_payload: str, aes_key_str: str) -> dict:
-        """Decrypt payload using Fernet (AES)"""
+        """
+        Decrypt payload using AES ECB mode (matches frontend CryptoJS implementation)
+        """
         try:
-            # Pad key to 32 bytes if needed
-            aes_key = aes_key_str.encode()
-            if len(aes_key) < 32:
-                aes_key = aes_key.ljust(32, b'0')
+            # Convert Base64 AES key string back to bytes
+            aes_key_bytes = base64.b64decode(aes_key_str)
             
-            # Create Fernet cipher with base64 encoded key
-            key = base64.urlsafe_b64encode(aes_key[:32])
-            cipher = Fernet(key)
-            decrypted = cipher.decrypt(encrypted_payload.encode())
-            return json.loads(decrypted.decode('utf-8'))
+            # Decrypt the payload using AES ECB mode with PKCS7 padding
+            cipher = Cipher(
+                algorithms.AES(aes_key_bytes),
+                modes.ECB(),
+                backend=default_backend()
+            )
+            decryptor = cipher.decryptor()
+            
+            # Decode the Base64 encrypted payload
+            encrypted_bytes = base64.b64decode(encrypted_payload)
+            
+            # Decrypt
+            decrypted_bytes = decryptor.update(encrypted_bytes) + decryptor.finalize()
+            
+            # Remove PKCS7 padding manually
+            padding_length = decrypted_bytes[-1]
+            decrypted_bytes = decrypted_bytes[:-padding_length]
+            
+            # Decode JSON
+            json_str = decrypted_bytes.decode('utf-8')
+            return json.loads(json_str)
         except Exception as e:
             raise ValueError(f"Failed to decrypt payload: {str(e)}")
 

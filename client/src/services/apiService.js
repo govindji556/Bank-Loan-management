@@ -66,6 +66,22 @@ export const apiPut = async (endpoint, body = null) => {
 };
 
 /**
+ * PATCH request
+ */
+export const apiPatch = async (endpoint, body = null) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: body ? JSON.stringify(body) : null,
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    throw new Error(`PATCH ${endpoint} failed: ${error.message}`);
+  }
+};
+
+/**
  * DELETE request
  */
 export const apiDelete = async (endpoint) => {

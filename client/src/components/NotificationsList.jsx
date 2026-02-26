@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { apiGet, apiPut } from "../services/apiService.js";
+import { apiGet, apiPatch } from "../services/apiService.js";
 
 export default function NotificationsList({ userRole, onNotificationRemoved }) {
   const [notifications, setNotifications] = useState([]);
@@ -26,7 +26,7 @@ export default function NotificationsList({ userRole, onNotificationRemoved }) {
 
   const markAsRead = async (notificationId) => {
     try {
-      await apiPut(`/notifications/${notificationId}/read`, {});
+      await apiPatch(`/notifications/${notificationId}/read`);
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       // Callback to parent to refresh data if needed
       if (onNotificationRemoved) {
