@@ -23,7 +23,30 @@ export default function ManagerDashboard({ user, onLogout }) {
     try {
       setLoading(true);
       const data = await apiGet("/manager/loans/applications");
-      setRequests(data);
+
+      // Enrich requests with username by fetching user profiles for unique user IDs
+      try {
+        const userIds = [...new Set(data.map(d => d.userId).filter(Boolean))];
+        const userMap = {};
+        await Promise.all(userIds.map(async (id) => {
+          try {
+            const u = await apiGet(`/users/${id}`);
+            userMap[id] = u.name || u.email || '';
+          } catch (e) {
+            userMap[id] = 'Unknown';
+          }
+        }));
+
+        const enriched = data.map(d => ({
+          ...d,
+          username: d.username || userMap[d.userId] || 'Unknown'
+        }));
+
+        setRequests(enriched);
+      } catch (e) {
+        // If enrichment fails, fall back to raw data
+        setRequests(data);
+      }
     } catch (err) {
       console.error("Error fetching requests:", err);
     } finally {
